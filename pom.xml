@@ -7,6 +7,17 @@
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <distributionManagement>
+        <repository>
+            <id>luminu</id>
+            <url>http://repo.luminu.net/repository/luminu-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>luminu</id>
+            <url>http://repo.luminu.net/repository/luminu-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <name>Waterfall-Super</name>
     <description>Super project for LumiWaterfall.</description>
     <url>https://github.com/WaterfallMC/</url>
