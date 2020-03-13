@@ -1,0 +1,60 @@
+From 1cfe8c734c24c25e97dc308af94f4fdd99b5f6e3 Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 23:24:23 +0100
+Subject: [PATCH] message.properties changes
+
+
+diff --git a/proxy/src/main/resources/messages.properties b/proxy/src/main/resources/messages.properties
+index 6e3ef0a4..f1e3ea2d 100644
+--- a/proxy/src/main/resources/messages.properties
++++ b/proxy/src/main/resources/messages.properties
+@@ -1,29 +1,29 @@
+ alert=\u00a78[\u00a74Alert\u00a78]\u00a7r 
+-already_connected=\u00a7cYou are already connected to this server!
+-already_connected_proxy=\u00a7cYou are already connected to this proxy!
+-already_connecting=\u00a7cAlready connecting to this server!
++already_connected=\u00a78\u258f \u00a73Luminu \u00a78\u258f \u00a7cDu bist bereits mit diesem Server verbunden!
++already_connected_proxy=\u00a7cDu bist bereits mit dieser Proxy verbunden!
++already_connecting=\u00a78\u258f \u00a73Luminu \u00a78\u258f \u00a7cDu wirst bereits zu diesem Server verbunden!
+ command_list=\u00a7a[{0}] \u00a7e({1}): \u00a7r{2}
+-connect_kick=\u00a7cKicked whilst connecting to {0}: {1}
++connect_kick=\u00a7cFehler beim Verbinden auf \u00a7e{0}\u00a7c! \n {1}
+ current_server=\u00a76You are currently connected to {0}.
+-fallback_kick=\u00a7cCould not connect to a default or fallback server, please try again later: {0}
+-fallback_lobby=\u00a7cCould not connect to target server, you have been moved to a fallback server.
+-lost_connection=[Proxy] Lost connection to server.
+-mojang_fail=Error occurred while contacting login servers, are they down?
++fallback_kick=\u00a7cDu konntest nicht auf die Lobby verbunden werden: {0}
++fallback_lobby=\u00a78\u258f \u00a73Luminu \u00a78\u258f \u00a7cDu wurdest auf die Lobby gesendet, da der Zielserver aktuell nicht erreichbar ist.
++lost_connection=\u00a7cDu hast die Verbindung zum Server verloren. \u00a7bBitte verbinde dich erneut mit dem Server.
++mojang_fail=\u00a7cEs konnte keine Verbindung zu den Anmeldeservern aufgebaut werden!
+ no_permission=\u00a7cYou do not have permission to execute this command!
+ no_server=\u00a7cThe specified server does not exist.
+ no_server_permission=\u00a7cYou don't have permission to access this server.
+-outdated_client=Outdated client! Please use {0}
+-outdated_server=Outdated server! I'm still on {0}
+-proxy_full=Server is full!
+-restart=[Proxy] Proxy restarting.
++outdated_client=\u00a74Dein Client wird nicht mehr unterst\u00fctzt! \n \u00a7cDu kannst das Netzwerk mit Minecraft \u00a7e1.8.x \u00a7c-\u00a7e 1.15.x \u00a7cbetreten!
++outdated_server=\u00a74Dein Client wird noch nicht unterst\u00fctzt! \n \u00a7cDu kannst das Netzwerk mit Minecraft \u00a7e1.8.x \u00a7c-\u00a7e 1.15.x \u00a7cbetreten!
++proxy_full=\u00a7cDer Server ist voll!
++restart=\u00a7cDer Proxyserver wurde neugestartet! \n \u00a7eBitte verbinde dich gleich erneut mit dem Server!
+ server_kick=[Kicked] 
+ server_list=\u00a76You may connect to the following servers at this time: 
+-server_went_down=\u00a7cThe server you were previously on went down, you have been connected to a fallback server
++server_went_down=\u00a78\u258f \u00a73Luminu \u00a78\u258f \u00a7cDein vorheriger Server wurde gestoppt! Du befindest dich nun auf der Lobby.
+ total_players=Total players online: {0}
+-name_too_long=Cannot have username longer than 16 characters
+-name_invalid=Username contains invalid characters.
+-ping_cannot_connect=\u00a7c[Bungee] Can't connect to server.
+-offline_mode_player=Not authenticated with Minecraft.net
++name_too_long=\u00a7cDein Name ist zu lang. Er darf maximal 16 Zeichen enthalten.
++name_invalid=\u00a7cDein Name enthält ungültige Zeichen!
++ping_cannot_connect=\u00a7cCan't connect to server.
++offline_mode_player=\u00a7cDu bist nicht mit Minecraft.net authentifiziert.
+ message_needed=\u00a7cYou must supply a message.
+ error_occurred_player=\u00a7cAn error occurred while parsing your message. (Hover for details)
+ error_occurred_console=\u00a7cAn error occurred while parsing your message: {0}
+-- 
+2.25.0.windows.1
+
