@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.luminu.waterfall</groupId>
-    <artifactId>lumiwaterfall-super</artifactId>
+    <artifactId>waterfall-super</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>LumiWaterfall-Super</name>
+    <name>Waterfall-Super</name>
     <description>Super project for LumiWaterfall.</description>
     <url>https://github.com/WaterfallMC/</url>
 
