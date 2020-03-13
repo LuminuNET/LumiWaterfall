@@ -1,4 +1,4 @@
-From b01fb53ca4c130209c1cfdb95ca9fff99b97e69f Mon Sep 17 00:00:00 2001
+From 15b00c7154f7a759d08037968db83755ed2b9d5b Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 21:45:33 +0100
 Subject: [PATCH] Localized API
@@ -258,7 +258,7 @@ index f497395e..d52229e9 100644
 +    // Luminu end
  }
 diff --git a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
-index b372d957..3d5a80a0 100644
+index b372d957..5b842c80 100644
 --- a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
 +++ b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
 @@ -378,4 +378,6 @@ public interface ProxiedPlayer extends Connection, CommandSender
@@ -266,7 +266,7 @@ index b372d957..3d5a80a0 100644
      void setDatabaseId(int databaseId);
      // Luminu end
 +
-+    void setCustomLocale(java.util.Locale locale); // Luminu - locale
++    void setLocale(java.util.Locale locale); // Luminu - locale
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 index a7da577b..84aeb23b 100644
@@ -281,7 +281,7 @@ index a7da577b..84aeb23b 100644
       * Current operation state.
       */
 diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
-index b609f5ae..53a582f7 100644
+index b609f5ae..b481dbac 100644
 --- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 +++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 @@ -75,6 +75,11 @@ public final class UserConnection implements ProxiedPlayer
@@ -289,9 +289,9 @@ index b609f5ae..53a582f7 100644
      private int databaseId;
      // Luminu end
 +    // Luminu start - locale
-+    @Getter
-+    @Setter
 +    private Locale customLocale;
++    public Locale getSetLocale() { return customLocale; }
++    public void setLocale(final Locale customLocale) { this.customLocale = customLocale; }
 +    // Luminu end
      /*========================================================================*/
      @NonNull

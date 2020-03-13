@@ -1,4 +1,4 @@
-From 6985fb67eb656405a0a503d8f9d9594d5eab8821 Mon Sep 17 00:00:00 2001
+From 933c1a7c54f1f7b3125abb4324b1b5ad470eebf9 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 22:04:39 +0100
 Subject: [PATCH] PendingConnectionCloseEvent
@@ -64,12 +64,12 @@ index 858b3ae6..5bb77d28 100644
          user.setServer( server );
          ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new DownstreamBridge( bungee, user, server ) );
 diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
-index 53a582f7..0b431452 100644
+index b481dbac..5258e799 100644
 --- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 +++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 @@ -80,6 +80,7 @@ public final class UserConnection implements ProxiedPlayer
-     @Setter
-     private Locale customLocale;
+     public Locale getSetLocale() { return customLocale; }
+     public void setLocale(final Locale customLocale) { this.customLocale = customLocale; }
      // Luminu end
 +    @Getter @Setter private boolean connectingToFallbackLobby; // Luminu - pendingconnectioncloseevent
      /*========================================================================*/
