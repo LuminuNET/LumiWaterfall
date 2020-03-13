@@ -1,4 +1,4 @@
-From f3095734b1a4b9d9d9ac94139b354db7c2c30e6e Mon Sep 17 00:00:00 2001
+From d92e608dd668ea8905b577c819fc34d3a02fe77f Mon Sep 17 00:00:00 2001
 From: Troy Frew <fuzzy_bot@arenaga.me>
 Date: Tue, 15 Nov 2016 08:56:43 -0500
 Subject: [PATCH] POM Changes
@@ -396,7 +396,7 @@ index f8b549dc..09865be9 100644
      <version>1.15-SNAPSHOT</version>
      <packaging>jar</packaging>
 diff --git a/pom.xml b/pom.xml
-index 37bdaf3d..e425a833 100644
+index 37bdaf3d..62524f43 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -4,20 +4,20 @@
@@ -437,6 +437,23 @@ index 37bdaf3d..e425a833 100644
      </scm>
      <issueManagement>
          <system>GitHub</system>
+@@ -80,12 +80,12 @@
+ 
+     <distributionManagement>
+         <repository>
+-            <id>papermc-releases</id>
+-            <url>https://papermc.io/repo/repository/maven-releases/</url>
++            <id>luminu</id>
++            <url>http://repo.luminu.net/repository/luminu-releases/</url>
+         </repository>
+         <snapshotRepository>
+-            <id>papermc-snapshots</id>
+-            <url>https://papermc.io/repo/repository/maven-snapshots/</url>
++            <id>luminu</id>
++            <url>http://repo.luminu.net/repository/luminu-snapshots/</url>
+         </snapshotRepository>
+     </distributionManagement>
+ 
 diff --git a/protocol/pom.xml b/protocol/pom.xml
 index 4592e2b3..7819877a 100644
 --- a/protocol/pom.xml
