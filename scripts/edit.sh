@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-pushd Travertine-Proxy
+pushd LumiWaterfall-Proxy
 git rebase --interactive upstream/upstream
 popd

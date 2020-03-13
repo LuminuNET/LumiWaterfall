@@ -2,17 +2,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.waterfallmc</groupId>
-    <artifactId>travertine-super</artifactId>
+    <groupId>net.luminu.waterfall</groupId>
+    <artifactId>lumiwaterfall-super</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Travertine-Super</name>
-    <description>Super project for Travertine.</description>
-    <url>https://github.com/WaterfallMC/Travertine</url>
+    <name>LumiWaterfall-Super</name>
+    <description>Super project for LumiWaterfall.</description>
+    <url>https://github.com/WaterfallMC/</url>
 
     <modules>
-        <module>Travertine-Proxy</module>
+        <module>LumiWaterfall-Proxy</module>
     </modules>
 
     <build>

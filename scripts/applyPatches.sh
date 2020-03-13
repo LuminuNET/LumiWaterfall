@@ -67,7 +67,7 @@ applyPatch BungeeCord Waterfall-Proxy HEAD
 popd
 basedir=$(dirname $basedir)
 
-# Apply travertine patches
-applyPatch Waterfall/Waterfall-Proxy Travertine-Proxy HEAD
+# Apply LumiWaterfall patches
+applyPatch Waterfall/Waterfall-Proxy LumiWaterfall-Proxy HEAD
 
 enableCommitSigningIfNeeded
