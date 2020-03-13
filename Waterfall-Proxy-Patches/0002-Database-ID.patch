@@ -1,0 +1,136 @@
+From feee14af5424ab3bcb3beba9fce117be85fc6ea7 Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 21:29:15 +0100
+Subject: [PATCH] Database ID
+
+
+diff --git a/api/src/main/java/net/luminu/bungee/api/event/DatabaseIdRequestEvent.java b/api/src/main/java/net/luminu/bungee/api/event/DatabaseIdRequestEvent.java
+new file mode 100644
+index 00000000..9f3aad1e
+--- /dev/null
++++ b/api/src/main/java/net/luminu/bungee/api/event/DatabaseIdRequestEvent.java
+@@ -0,0 +1,18 @@
++package net.luminu.bungee.api.event;
++
++import lombok.Data;
++import lombok.EqualsAndHashCode;
++import lombok.ToString;
++import net.md_5.bungee.api.connection.ProxiedPlayer;
++import net.md_5.bungee.api.plugin.Event;
++
++@Data
++@ToString(callSuper = false)
++@EqualsAndHashCode(callSuper = false)
++public class DatabaseIdRequestEvent extends Event {
++
++    /**
++     * The player involved with this event.
++     */
++    private final ProxiedPlayer player;
++}
+diff --git a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+index a4011335..23684951 100644
+--- a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
++++ b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+@@ -327,4 +327,5 @@ public abstract class ProxyServer
+      */
+     public abstract Title createTitle();
+ 
++    public abstract ProxiedPlayer getPlayer(int id); // Luminu - database id
+ }
+diff --git a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
+index f7459860..b372d957 100644
+--- a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
++++ b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
+@@ -372,4 +372,10 @@ public interface ProxiedPlayer extends Connection, CommandSender
+      * @return this player's {@link Scoreboard}
+      */
+     Scoreboard getScoreboard();
++
++    // Luminu start - database id
++    int getDatabaseId();
++
++    void setDatabaseId(int databaseId);
++    // Luminu end
+ }
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+index a839cba5..a7da577b 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+@@ -172,6 +172,7 @@ public class BungeeCord extends ProxyServer
+     @Getter
+     private ConnectionThrottle connectionThrottle;
+     private final ModuleManager moduleManager = new ModuleManager();
++    private final Map<Integer, UserConnection> connectionsById = new HashMap<>(); // Luminu - database id
+ 
+     {
+         // TODO: Proper fallback when we interface the manager
+@@ -592,6 +593,21 @@ public class BungeeCord extends ProxyServer
+         return connections.size();
+     }
+ 
++    // Luminu start
++    @Override
++    public ProxiedPlayer getPlayer(int id)
++    {
++        connectionLock.readLock().lock();
++        try
++        {
++            return connectionsById.get( id );
++        } finally
++        {
++            connectionLock.readLock().unlock();
++        }
++    }
++    // Luminu end
++
+     @Override
+     public ProxiedPlayer getPlayer(String name)
+     {
+@@ -739,6 +755,7 @@ public class BungeeCord extends ProxyServer
+             connections.put( con.getName(), con );
+             connectionsByUUID.put( con.getUniqueId(), con );
+             connectionsByOfflineUUID.put( con.getPendingConnection().getOfflineId(), con );
++            connectionsById.put( con.getDatabaseId(), con ); // Luminu - database id
+         } finally
+         {
+             connectionLock.writeLock().unlock();
+@@ -756,6 +773,7 @@ public class BungeeCord extends ProxyServer
+                 connections.remove( con.getName() );
+                 connectionsByUUID.remove( con.getUniqueId() );
+                 connectionsByOfflineUUID.remove( con.getPendingConnection().getOfflineId() );
++                connectionsById.remove( con.getDatabaseId() ); // Luminu - database id
+             }
+         } finally
+         {
+diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
+index 7c129221..b609f5ae 100644
+--- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
++++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
+@@ -70,6 +70,11 @@ import net.md_5.bungee.util.ChatComponentTransformer;
+ public final class UserConnection implements ProxiedPlayer
+ {
+ 
++    // Luminu start - database id
++    @Getter
++    @Setter
++    private int databaseId;
++    // Luminu end
+     /*========================================================================*/
+     @NonNull
+     private final ProxyServer bungee;
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+index 007d3daf..1d9e39fc 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+@@ -538,6 +538,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+ 
+                             unsafe.sendPacket( new LoginSuccess( getUniqueId().toString(), getName() ) ); // With dashes in between
+                             ch.setProtocol( Protocol.GAME );
++                            bungee.getPluginManager().callEvent( new net.luminu.bungee.api.event.DatabaseIdRequestEvent( userCon ) ); // Luminu - database id
+ 
+                             ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new UpstreamBridge( bungee, userCon ) );
+                             bungee.getPluginManager().callEvent( new PostLoginEvent( userCon ) );
+-- 
+2.25.0.windows.1
+
