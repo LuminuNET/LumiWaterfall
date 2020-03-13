@@ -1,0 +1,41 @@
+From f8b476f223b3323aa8dff0b567783e0ea4db2ff3 Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 22:01:52 +0100
+Subject: [PATCH] ProxyInitializedEvent
+
+
+diff --git a/api/src/main/java/net/luminu/bungee/api/event/ProxyInitializedEvent.java b/api/src/main/java/net/luminu/bungee/api/event/ProxyInitializedEvent.java
+new file mode 100644
+index 00000000..ceb00f16
+--- /dev/null
++++ b/api/src/main/java/net/luminu/bungee/api/event/ProxyInitializedEvent.java
+@@ -0,0 +1,13 @@
++package net.luminu.bungee.api.event;
++
++import lombok.EqualsAndHashCode;
++import lombok.ToString;
++import net.md_5.bungee.api.plugin.Event;
++
++/**
++ * Event fired when the proxy has successfully been started.
++ */
++@ToString
++@EqualsAndHashCode(callSuper = false)
++public class ProxyInitializedEvent extends Event {
++}
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+index 84aeb23b..54b31e5f 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+@@ -307,7 +307,7 @@ public class BungeeCord extends ProxyServer
+             }
+         }, 0, TimeUnit.MINUTES.toMillis( 5 ) );
+         //metricsThread.scheduleAtFixedRate( new Metrics(), 0, TimeUnit.MINUTES.toMillis( Metrics.PING_INTERVAL ) ); // Waterfall: Disable Metrics
+-
++        ProxyServer.getInstance().getPluginManager().callEvent(new net.luminu.bungee.api.event.ProxyInitializedEvent()); // Luminu - proxyinitializedevent
+         Runtime.getRuntime().addShutdownHook( new Thread()
+         {
+             @Override
+-- 
+2.25.0.windows.1
+

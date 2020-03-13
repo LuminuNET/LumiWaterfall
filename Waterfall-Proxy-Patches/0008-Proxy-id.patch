@@ -1,0 +1,84 @@
+From 0ebd9f9d3615a93e45eb6a9a7eaa8ea4106f2240 Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 22:14:03 +0100
+Subject: [PATCH] Proxy id
+
+
+diff --git a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+index ba60fc6b..e2ce14da 100644
+--- a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
++++ b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+@@ -362,4 +362,13 @@ public abstract class ProxyServer
+         }
+     }
+     // Luminu end
++
++    // Luminu start - set proxy id through start parameter
++    /**
++     * May be null before Lumicore has enabled.
++     *
++     * @return proxy id set through start params or through the 'PROXY_ID.yml' file
++     */
++    public abstract String getProxyId();
++    // Luminu end
+ }
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+index 54b31e5f..c343b5a2 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+@@ -100,6 +100,7 @@ public class BungeeCord extends ProxyServer
+ {
+ 
+     @Getter @Setter private net.luminu.bungee.api.locale.BungeeLocaleProvider localeProvider;  // Luminu - localeprovider
++    @Getter @Setter private String proxyId;  // Luminu - set proxy id through start parameter, may be null
+     /**
+      * Current operation state.
+      */
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+index 6b3c28f7..b6476679 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+@@ -28,6 +28,7 @@ public class BungeeCordLauncher
+         parser.acceptsAll( Arrays.asList( "v", "version" ), "Print version and exit" );
+         parser.acceptsAll( Arrays.asList( "noconsole" ), "Disable console input" );
+         parser.acceptsAll(Arrays.asList("port"), "Port to listen on").withRequiredArg().ofType(Integer.class); // Luminu - set port through start parameter
++        parser.acceptsAll(Arrays.asList("proxyid"), "Proxy id used by Lumicore").withRequiredArg().ofType(String.class); // Luminu - set proxy id through start parameter
+ 
+         OptionSet options = parser.parse( args );
+ 
+@@ -65,7 +66,31 @@ public class BungeeCordLauncher
+ 
+         BungeeCord bungee = new BungeeCord();
+         ProxyServer.setInstance( bungee );
+-        bungee.getLogger().info( "Enabled Waterfall version " + bungee.getVersion() );
++        // Luminu start - set proxy id through start parameter
++        if (options.has("proxyid")) {
++            bungee.setProxyId((String) options.valueOf("proxyid"));
++        } else {
++            java.io.File file = new java.io.File("PROXY_ID.yml");
++            if (file.exists()) {
++                String proxyId = new String(java.nio.file.Files.readAllBytes(file.toPath()));
++                if (proxyId.contains(" ")) {
++                    bungee.getLogger().warning("The proxy id should not contain any spaces!");
++                    proxyId = proxyId.replaceAll(" ", "");
++                }
++
++                if (proxyId.isEmpty()) {
++                    bungee.getLogger().warning("Empty proxy id in PROXY_ID.yml!");
++                    bungee.setProxyId("Proxy-" + new java.util.Random().nextInt(1_000_000));
++                } else {
++                    bungee.setProxyId(proxyId);
++                }
++            } else {
++                bungee.getLogger().warning("No PROXY_ID.yml file found - generating random proxy id.");
++                bungee.setProxyId("Proxy-" + new java.util.Random().nextInt(1_000_000));
++            }
++        }
++        bungee.getLogger().info( "Enabled LumiWaterfall version " + bungee.getVersion() + " with proxy id " + bungee.getProxyId() );
++        // Luminu end
+         bungee.start();
+ 
+         if ( !options.has( "noconsole" ) )
+-- 
+2.25.0.windows.1
+

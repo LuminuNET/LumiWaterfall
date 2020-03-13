@@ -1,0 +1,58 @@
+From 0601c8c4c683ae6bad3e63aa7a61d09c458b242a Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 22:08:46 +0100
+Subject: [PATCH] Set port through start param
+
+
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+index dc2c584d..6b3c28f7 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+@@ -15,6 +15,7 @@ import net.md_5.bungee.command.ConsoleCommandSender;
+ 
+ public class BungeeCordLauncher
+ {
++    public static String globalPort; // Luminu - set port through start parameter
+ 
+     public static void main(String[] args) throws Exception
+     {
+@@ -26,6 +27,7 @@ public class BungeeCordLauncher
+         parser.acceptsAll( Arrays.asList( "help" ), "Show the help" );
+         parser.acceptsAll( Arrays.asList( "v", "version" ), "Print version and exit" );
+         parser.acceptsAll( Arrays.asList( "noconsole" ), "Disable console input" );
++        parser.acceptsAll(Arrays.asList("port"), "Port to listen on").withRequiredArg().ofType(Integer.class); // Luminu - set port through start parameter
+ 
+         OptionSet options = parser.parse( args );
+ 
+@@ -39,6 +41,11 @@ public class BungeeCordLauncher
+             System.out.println( BungeeCord.class.getPackage().getImplementationVersion() );
+             return;
+         }
++        // Luminu start - set port through start parameter
++        if (options.has("port")) {
++            globalPort = Integer.toString((Integer) options.valueOf("port"));
++        }
++        // Luminu end
+ 
+         if ( BungeeCord.class.getPackage().getSpecificationVersion() != null && System.getProperty( "IReallyKnowWhatIAmDoingISwear" ) == null )
+         {
+diff --git a/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java b/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
+index 65121ba2..dad486e3 100644
+--- a/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
++++ b/proxy/src/main/java/net/md_5/bungee/conf/YamlConfig.java
+@@ -259,6 +259,12 @@ public class YamlConfig implements ConfigurationAdapter
+             int maxPlayers = get( "max_players", 1, val );
+             boolean forceDefault = get( "force_default_server", false, val );
+             String host = get( "host", "0.0.0.0:25577", val );
++            // Luminu start - set port through start parameter
++            String globalPort = net.md_5.bungee.BungeeCordLauncher.globalPort;
++            if (globalPort != null) {
++                host = host.split(":")[0] + ":" + globalPort;
++            }
++            // Luminu end
+             int tabListSize = get( "tab_size", 60, val );
+             SocketAddress address = Util.getAddr( host );
+             Map<String, String> forced = new CaseInsensitiveMap<>( get( "forced_hosts", forcedDef, val ) );
+-- 
+2.25.0.windows.1
+
