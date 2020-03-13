@@ -1,4 +1,4 @@
-From 34e2a9835f7b1960652f5ebddcf0cbabe71a3b36 Mon Sep 17 00:00:00 2001
+From 6985fb67eb656405a0a503d8f9d9594d5eab8821 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 22:04:39 +0100
 Subject: [PATCH] PendingConnectionCloseEvent
@@ -51,6 +51,18 @@ index 00000000..e55c5ebb
 +        this.sendTo = sendTo;
 +    }
 +}
+diff --git a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+index 858b3ae6..5bb77d28 100644
+--- a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
++++ b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
+@@ -347,6 +347,7 @@ public class ServerConnector extends PacketHandler
+         user.getPendingConnects().remove( target );
+         user.setServerJoinQueue( null );
+         user.setDimensionChange( false );
++        user.setConnectingToFallbackLobby( false ); // Luminu - pendingconnectioncloseevent
+ 
+         user.setServer( server );
+         ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new DownstreamBridge( bungee, user, server ) );
 diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 index 53a582f7..0b431452 100644
 --- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java

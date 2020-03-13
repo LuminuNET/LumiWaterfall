@@ -1,0 +1,34 @@
+From 85919d26c1c707c6e18d135fc8d1def0a8970f39 Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 22:25:35 +0100
+Subject: [PATCH] registerServer method
+
+
+diff --git a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+index e2ce14da..0c10b8e1 100644
+--- a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
++++ b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+@@ -371,4 +371,20 @@ public abstract class ProxyServer
+      */
+     public abstract String getProxyId();
+     // Luminu end
++
++    // Luminu start - registerserver method
++    /**
++     * Properly registers a proxied server.
++     *
++     * @return true if the server has been added (false if there already is a server with that name)
++     */
++    public boolean registerServer(String serverId, String address, int port) {
++        if (getServers().containsKey(serverId)) return false;
++
++        InetSocketAddress socketAddress = InetSocketAddress.createUnresolved(address, port);
++        net.md_5.bungee.api.config.ServerInfo info = constructServerInfo(serverId, socketAddress, "", false);
++        getServers().put(serverId, info);
++        return true;
++    }
++    // Luminu end
+ }
+-- 
+2.25.0.windows.1
+
