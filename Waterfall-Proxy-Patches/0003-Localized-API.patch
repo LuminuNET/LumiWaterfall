@@ -1,0 +1,355 @@
+From b01fb53ca4c130209c1cfdb95ca9fff99b97e69f Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 21:45:33 +0100
+Subject: [PATCH] Localized API
+
+
+diff --git a/api/src/main/java/net/luminu/bungee/api/locale/BungeeLocaleProvider.java b/api/src/main/java/net/luminu/bungee/api/locale/BungeeLocaleProvider.java
+new file mode 100644
+index 00000000..9d168e03
+--- /dev/null
++++ b/api/src/main/java/net/luminu/bungee/api/locale/BungeeLocaleProvider.java
+@@ -0,0 +1,42 @@
++package net.luminu.bungee.api.locale;
++
++import net.md_5.bungee.api.CommandSender;
++
++import java.util.Locale;
++
++/**
++ * Interface with the bare minimum methods to be implemented by a proper system.
++ * This exists to avoid some quite reasonable overhead in otherwise created events and calls.
++ * <p>
++ * See child interfaces/implementation for further methods and details.
++ */
++public interface BungeeLocaleProvider {
++
++    /**
++     * Returns the message for the given config key from the config.
++     *
++     * @param locale locale
++     * @param key    config key
++     * @return message from config if present, else null
++     */
++    String getStringMessage(Locale locale, String key);
++
++    /**
++     * Returns the message for the given config key from the config.
++     *
++     * @param locale       locale
++     * @param key          config key
++     * @param replacements replacements
++     * @return message from config if present, else null
++     */
++    String getStringMessage(Locale locale, String key, String... replacements);
++
++    /**
++     * Sends a localized message to the sender.
++     *
++     * @param sender       command sender
++     * @param key          message key
++     * @param replacements replacements
++     */
++    void sendMessage(CommandSender sender, String key, String... replacements);
++}
+diff --git a/api/src/main/java/net/luminu/bungee/api/locale/FormatUtils.java b/api/src/main/java/net/luminu/bungee/api/locale/FormatUtils.java
+new file mode 100644
+index 00000000..0b26391d
+--- /dev/null
++++ b/api/src/main/java/net/luminu/bungee/api/locale/FormatUtils.java
+@@ -0,0 +1,28 @@
++package net.luminu.bungee.api.locale;
++
++import com.google.common.base.Preconditions;
++
++final class FormatUtils {
++
++    static String replace(String s, final String... replacements) {
++        if (replacements.length == 0) return s;
++        Preconditions.checkArgument(replacements.length % 2 == 0, "Replacements have to be even!");
++        String key = null;
++        for (int i = 0; i < replacements.length; i++) {
++            final String replacement = replacements[i];
++            if (key == null) {
++                if (s.contains(replacement)) {
++                    key = replacement;
++                } else {
++                    // Skip pair if the given string doesn't contain the key.
++                    i++;
++                }
++                continue;
++            }
++
++            s = s.replace(key, replacement);
++            key = null;
++        }
++        return s;
++    }
++}
+diff --git a/api/src/main/java/net/md_5/bungee/api/CommandSender.java b/api/src/main/java/net/md_5/bungee/api/CommandSender.java
+index d5888311..00d5b7a1 100644
+--- a/api/src/main/java/net/md_5/bungee/api/CommandSender.java
++++ b/api/src/main/java/net/md_5/bungee/api/CommandSender.java
+@@ -89,4 +89,53 @@ public interface CommandSender
+      * permissions
+      */
+     public Collection<String> getPermissions();
++
++    // Luminu start
++    /**
++     * Gets the player's locale set in the LocaleProvider.
++     *
++     * @return the locale as set in the LocaleProvider
++     */
++    public default java.util.Locale getSetLocale() {
++        return java.util.Locale.GERMAN;
++    }
++
++    /**
++     * Send a localized message to this sender.
++     *
++     * @param key message key
++     */
++    public default void sendLocalized(String key) {
++        sendLocalized(key, (String[]) null);
++    }
++
++    /**
++     * Send a localized message to this sender.
++     *
++     * @param key message key
++     * @param replacements replacements
++     */
++    public default void sendLocalized(String key, String... replacements) {
++        net.md_5.bungee.api.ProxyServer.getInstance().getLocaleProvider().sendMessage(this, key, replacements);
++    }
++
++    /**
++     * Returns a localized message
++     *
++     * @param key message key
++     */
++    public default String getLocalizedString(String key) {
++        return net.md_5.bungee.api.ProxyServer.getInstance().getLocaleProvider().getStringMessage(getSetLocale(), key);
++    }
++
++    /**
++     * Returns a localized message
++     *
++     * @param key message key
++     * @param replacements replacements
++     */
++    public default String getLocalizedString(String key, String... replacements) {
++        return net.md_5.bungee.api.ProxyServer.getInstance().getLocaleProvider().getStringMessage(getSetLocale(), key, replacements);
++    }
++    // Luminu end
+ }
+diff --git a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+index 23684951..ba60fc6b 100644
+--- a/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
++++ b/api/src/main/java/net/md_5/bungee/api/ProxyServer.java
+@@ -328,4 +328,38 @@ public abstract class ProxyServer
+     public abstract Title createTitle();
+ 
+     public abstract ProxiedPlayer getPlayer(int id); // Luminu - database id
++
++    // Luminu start - locale
++    public abstract net.luminu.bungee.api.locale.BungeeLocaleProvider getLocaleProvider();
++
++    /**
++     * Broadcast a message to all players.
++     *
++     * @param key message key
++     * @return the number of players
++     */
++    public void broadcastLocalized(String key) {
++        broadcastLocalized(key, (String[]) null);
++    }
++
++    /**
++     * Broadcast a message to all players.
++     *
++     * @param key message key
++     * @param replacements replacements
++     * @return the number of players
++     */
++    public void broadcastLocalized(String key, String... replacements) {
++        java.util.Collection<ProxiedPlayer> players = getPlayers();
++        if (replacements != null) {
++            for (ProxiedPlayer player : players) {
++                player.sendLocalized(key, replacements);
++            }
++        } else {
++            for (ProxiedPlayer player : players) {
++                player.sendLocalized(key);
++            }
++        }
++    }
++    // Luminu end
+ }
+diff --git a/api/src/main/java/net/md_5/bungee/api/connection/Connection.java b/api/src/main/java/net/md_5/bungee/api/connection/Connection.java
+index f59b49c7..15bb4aec 100644
+--- a/api/src/main/java/net/md_5/bungee/api/connection/Connection.java
++++ b/api/src/main/java/net/md_5/bungee/api/connection/Connection.java
+@@ -85,4 +85,29 @@ public interface Connection
+          */
+         void sendPacket(DefinedPacket packet);
+     }
++
++    // Luminu start
++    /**
++     * Disconnects this end of the connection for the specified reason. If this
++     * is an {@link ProxiedPlayer} the respective server connection will be
++     * closed too.
++     *
++     * @param key message key
++     */
++    default void disconnectLocalized(String key) {
++        disconnect();
++    }
++
++    /**
++     * Disconnects this end of the connection for the specified reason. If this
++     * is an {@link ProxiedPlayer} the respective server connection will be
++     * closed too.
++     *
++     * @param key message key
++     * @param replacements replacements
++     */
++    default void disconnectLocalized(String key, String... replacements) {
++        disconnect();
++    }
++    // Luminu end
+ }
+diff --git a/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java b/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
+index f497395e..d52229e9 100644
+--- a/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
++++ b/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
+@@ -89,4 +89,31 @@ public interface PendingConnection extends Connection
+      * @return Whether the client is using a legacy client.
+      */
+     boolean isLegacy();
++
++    // Luminu start - locale
++    public default java.util.Locale getSetLocale() {
++        return java.util.Locale.GERMAN;
++    }
++
++    /**
++     * Sends this sender a localized message
++     *
++     * @param key message key
++     */
++    public default String getLocalized(String key) {
++        net.luminu.bungee.api.locale.BungeeLocaleProvider localeProvider = net.md_5.bungee.api.ProxyServer.getInstance().getLocaleProvider();
++        return localeProvider.getStringMessage(getSetLocale(), key);
++    }
++
++    /**
++     * Returns a localized message
++     *
++     * @param key message key
++     * @param replacements replacements
++     */
++    public default String getLocalized(String key, String... replacements) {
++        net.luminu.bungee.api.locale.BungeeLocaleProvider localeProvider = net.md_5.bungee.api.ProxyServer.getInstance().getLocaleProvider();
++        return localeProvider.getStringMessage(getSetLocale(), key, replacements);
++    }
++    // Luminu end
+ }
+diff --git a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
+index b372d957..3d5a80a0 100644
+--- a/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
++++ b/api/src/main/java/net/md_5/bungee/api/connection/ProxiedPlayer.java
+@@ -378,4 +378,6 @@ public interface ProxiedPlayer extends Connection, CommandSender
+ 
+     void setDatabaseId(int databaseId);
+     // Luminu end
++
++    void setCustomLocale(java.util.Locale locale); // Luminu - locale
+ }
+diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+index a7da577b..84aeb23b 100644
+--- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
++++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
+@@ -99,6 +99,7 @@ import net.md_5.bungee.util.CaseInsensitiveMap;
+ public class BungeeCord extends ProxyServer
+ {
+ 
++    @Getter @Setter private net.luminu.bungee.api.locale.BungeeLocaleProvider localeProvider;  // Luminu - localeprovider
+     /**
+      * Current operation state.
+      */
+diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
+index b609f5ae..53a582f7 100644
+--- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
++++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
+@@ -75,6 +75,11 @@ public final class UserConnection implements ProxiedPlayer
+     @Setter
+     private int databaseId;
+     // Luminu end
++    // Luminu start - locale
++    @Getter
++    @Setter
++    private Locale customLocale;
++    // Luminu end
+     /*========================================================================*/
+     @NonNull
+     private final ProxyServer bungee;
+@@ -619,6 +624,7 @@ public final class UserConnection implements ProxiedPlayer
+     }
+ 
+     @Override
++    @Deprecated // Luminu - locale
+     public Locale getLocale()
+     {
+         return ( locale == null && settings != null ) ? locale = Locale.forLanguageTag( settings.getLocale().replace( '_', '-' ) ) : locale;
+@@ -756,4 +762,16 @@ public final class UserConnection implements ProxiedPlayer
+         return entityRewrite == net.md_5.bungee.entitymap.EntityMap_Dummy.INSTANCE;
+     }
+     // Waterfall end
++
++    // Luminu start - locale
++    @Override
++    public void disconnectLocalized(String key) {
++        disconnect(getLocalizedString(key));
++    }
++
++    @Override
++    public void disconnectLocalized(String key, String... replacements) {
++        disconnect(getLocalizedString(key, replacements));
++    }
++    // Luminu end
+ }
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+index 1d9e39fc..29a317a7 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+@@ -70,6 +70,7 @@ import net.md_5.bungee.util.QuietException;
+ public class InitialHandler extends PacketHandler implements PendingConnection
+ {
+ 
++    @Getter @lombok.Setter java.util.Locale locale; // Luminu - locale
+     private final BungeeCord bungee;
+     private ChannelWrapper ch;
+     @Getter
+@@ -669,4 +670,16 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+     {
+         return !ch.isClosed();
+     }
++
++    // Luminu start - locale
++    @Override
++    public void disconnectLocalized(String key) {
++        disconnect(getLocalized(key));
++    }
++
++    @Override
++    public void disconnectLocalized(String key, String... replacements) {
++        disconnect(getLocalized(key, replacements));
++    }
++    // Luminu end
+ }
+-- 
+2.25.0.windows.1
+
