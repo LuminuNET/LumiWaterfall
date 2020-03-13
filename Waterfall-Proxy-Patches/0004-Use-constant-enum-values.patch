@@ -1,0 +1,171 @@
+From 6c25efdba471641965361067eb45cf2793bc83ea Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Fri, 13 Mar 2020 21:58:41 +0100
+Subject: [PATCH] Use constant enum values
+
+
+diff --git a/api/src/main/java/net/md_5/bungee/api/score/Position.java b/api/src/main/java/net/md_5/bungee/api/score/Position.java
+index c3da93b2..1fa7264a 100644
+--- a/api/src/main/java/net/md_5/bungee/api/score/Position.java
++++ b/api/src/main/java/net/md_5/bungee/api/score/Position.java
+@@ -25,4 +25,12 @@ public enum Position
+     SIDEBAR_LIGHT_PURPLE,
+     SIDEBAR_YELLOW,
+     SIDEBAR_WHITE;
++
++    // Luminu start - use constants
++    private static final Position[] POSITIONS = values();
++
++    public static Position[] getPositions() {
++        return POSITIONS;
++    }
++    // Luminu end
+ }
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+index aa1515f4..6b6e2cf0 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
+@@ -402,7 +402,7 @@ public enum Protocol
+ 
+     private static void dump(int version)
+     {
+-        for ( Protocol protocol : Protocol.values() )
++        for ( Protocol protocol : Protocol.getProtocols() ) // Luminu - use constants
+         {
+             dump( version, protocol );
+         }
+@@ -586,4 +586,12 @@ public enum Protocol
+             return protocolData.packetMap.get( packet );
+         }
+     }
++
++    // Luminu start - use constants
++    private static final Protocol[] PROTOCOLS = values();
++
++    public static Protocol[] getProtocols(){
++        return PROTOCOLS;
++    }
++    // Luminu end
+ }
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/PlayerListItem.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/PlayerListItem.java
+index 92bacc7c..e6e14b1e 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/PlayerListItem.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/PlayerListItem.java
+@@ -21,7 +21,7 @@ public class PlayerListItem extends DefinedPacket
+     @Override
+     public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion)
+     {
+-        action = Action.values()[DefinedPacket.readVarInt( buf )];
++        action = Action.getActions()[DefinedPacket.readVarInt( buf )]; // Luminu - use constants
+         items = new Item[ DefinedPacket.readVarInt( buf ) ];
+         for ( int i = 0; i < items.length; i++ )
+         {
+@@ -137,6 +137,14 @@ public class PlayerListItem extends DefinedPacket
+         UPDATE_LATENCY,
+         UPDATE_DISPLAY_NAME,
+         REMOVE_PLAYER;
++
++        // Luminu start - use constants
++        private static final Action[] ACTIONS = values();
++
++        public static Action[] getActions() {
++            return ACTIONS;
++        }
++        // Luminu end
+     }
+ 
+     @Data
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/ScoreboardObjective.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/ScoreboardObjective.java
+index 3c7905d5..7fb56563 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/ScoreboardObjective.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/ScoreboardObjective.java
+@@ -35,7 +35,7 @@ public class ScoreboardObjective extends DefinedPacket
+             value = readString( buf );
+             if ( protocolVersion >= ProtocolConstants.MINECRAFT_1_13 )
+             {
+-                type = HealthDisplay.values()[readVarInt( buf )];
++                type = HealthDisplay.getHealthDisplays()[readVarInt( buf )]; // Luminu - use constants
+             } else
+             {
+                 type = HealthDisplay.fromString( readString( buf ) );
+@@ -82,5 +82,13 @@ public class ScoreboardObjective extends DefinedPacket
+         {
+             return valueOf( s.toUpperCase( Locale.ROOT ) );
+         }
++
++        // Luminu start - use constants
++        private static final HealthDisplay[] HEALTH_DISPLAYS = values();
++
++        public static HealthDisplay[] getHealthDisplays(){
++            return HEALTH_DISPLAYS;
++        }
++        // Luminu end
+     }
+ }
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Title.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Title.java
+index 6bc1469c..91ce5525 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/Title.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/packet/Title.java
+@@ -35,7 +35,7 @@ public class Title extends DefinedPacket
+             index++;
+         }
+ 
+-        action = Action.values()[index];
++        action = Action.getActions()[index];
+         switch ( action )
+         {
+             case TITLE:
+@@ -92,6 +92,14 @@ public class Title extends DefinedPacket
+         ACTIONBAR,
+         TIMES,
+         CLEAR,
+-        RESET
++        RESET;
++
++        // Luminu start - use constants
++        private static final Action[] ACTIONS = values();
++
++        public static Action[] getActions() {
++            return ACTIONS;
++        }
++        // Luminu end
+     }
+ }
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
+index d7d0fafc..5aaa3f9a 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
+@@ -209,7 +209,7 @@ public class DownstreamBridge extends PacketHandler
+     {
+         Scoreboard serverScoreboard = con.getServerSentScoreboard();
+         serverScoreboard.setName( displayScoreboard.getName() );
+-        serverScoreboard.setPosition( Position.values()[displayScoreboard.getPosition()] );
++        serverScoreboard.setPosition( Position.getPositions()[displayScoreboard.getPosition()] ); // Luminu - use constants
+     }
+ 
+     @Override
+diff --git a/proxy/src/main/java/net/md_5/bungee/tab/TabList.java b/proxy/src/main/java/net/md_5/bungee/tab/TabList.java
+index 7d79ef7b..522f7b38 100644
+--- a/proxy/src/main/java/net/md_5/bungee/tab/TabList.java
++++ b/proxy/src/main/java/net/md_5/bungee/tab/TabList.java
+@@ -10,7 +10,7 @@ import net.md_5.bungee.protocol.packet.PlayerListItem;
+ @RequiredArgsConstructor
+ public abstract class TabList
+ {
+-
++    private static final String[][] PROPERTIES = new String[ 0 ][ 0 ]; // Luminu - use constants
+     protected final ProxiedPlayer player;
+ 
+     public abstract void onUpdate(PlayerListItem playerListItem);
+@@ -51,7 +51,7 @@ public abstract class TabList
+                     item.setProperties( props );
+                 } else
+                 {
+-                    item.setProperties( new String[ 0 ][ 0 ] );
++                    item.setProperties( PROPERTIES ); // Luminu - use constants
+                 }
+                 if ( playerListItem.getAction() == PlayerListItem.Action.ADD_PLAYER || playerListItem.getAction() == PlayerListItem.Action.UPDATE_GAMEMODE )
+                 {
+-- 
+2.25.0.windows.1
+
