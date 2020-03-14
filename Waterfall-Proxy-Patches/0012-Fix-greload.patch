@@ -1,0 +1,22 @@
+From 517e15bb39a0da8e1e6b4e12eb21ff316d44073b Mon Sep 17 00:00:00 2001
+From: KennyTV <kennytv@t-online.de>
+Date: Sat, 14 Mar 2020 01:25:33 +0100
+Subject: [PATCH] Fix-greload
+
+
+diff --git a/proxy/src/main/java/net/md_5/bungee/conf/Configuration.java b/proxy/src/main/java/net/md_5/bungee/conf/Configuration.java
+index 85d2197a..b50a7704 100644
+--- a/proxy/src/main/java/net/md_5/bungee/conf/Configuration.java
++++ b/proxy/src/main/java/net/md_5/bungee/conf/Configuration.java
+@@ -116,7 +116,7 @@ public abstract class Configuration implements ProxyConfig
+         if ( servers == null )
+         {
+             servers = new CaseInsensitiveMap<>( newServers );
+-        } else
++        } else if (false) // Luminu - disable server loading
+         {
+             Map<String, ServerInfo> oldServers = getServersCopy();
+ 
+-- 
+2.25.0.windows.1
+
