@@ -1,4 +1,4 @@
-From d92e608dd668ea8905b577c819fc34d3a02fe77f Mon Sep 17 00:00:00 2001
+From 9e7a7dcce085fe76b7610a8a6b62c190ca913e9c Mon Sep 17 00:00:00 2001
 From: Troy Frew <fuzzy_bot@arenaga.me>
 Date: Tue, 15 Nov 2016 08:56:43 -0500
 Subject: [PATCH] POM Changes
@@ -484,7 +484,7 @@ index 4592e2b3..7819877a 100644
              <version>${project.version}</version>
              <scope>compile</scope>
 diff --git a/proxy/pom.xml b/proxy/pom.xml
-index 54500dde..1a515654 100644
+index 54500dde..912e50f4 100644
 --- a/proxy/pom.xml
 +++ b/proxy/pom.xml
 @@ -4,13 +4,13 @@
@@ -503,7 +503,21 @@ index 54500dde..1a515654 100644
      <artifactId>waterfall-proxy</artifactId>
      <version>1.15-SNAPSHOT</version>
      <packaging>jar</packaging>
-@@ -42,14 +42,14 @@
+@@ -18,10 +18,11 @@
+     <name>Waterfall-Proxy</name>
+     <description>Proxy component of the Elastic Portal Suite</description>
+ 
+-    <properties>
++    <!-- Luminu - deploy proxy module -->
++    <!--<properties>
+         <maven.deploy.skip>true</maven.deploy.skip>
+         <maven.javadoc.skip>true</maven.javadoc.skip>
+-    </properties>
++    </properties>-->
+ 
+     <dependencies>
+         <dependency>
+@@ -42,14 +43,14 @@
              <version>${netty.version}</version>
              <scope>compile</scope>
          </dependency>
@@ -520,7 +534,7 @@ index 54500dde..1a515654 100644
          <dependency>
              <groupId>io.netty</groupId>
              <artifactId>netty-handler</artifactId>
-@@ -64,31 +64,31 @@
+@@ -64,31 +65,31 @@
              <scope>compile</scope>
          </dependency>
          <dependency>
