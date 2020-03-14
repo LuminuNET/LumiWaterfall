@@ -1,4 +1,4 @@
-From 85919d26c1c707c6e18d135fc8d1def0a8970f39 Mon Sep 17 00:00:00 2001
+From a1dcd166b639b75564507d1a748f08c39b4b09dc Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 22:25:35 +0100
 Subject: [PATCH] registerServer method
