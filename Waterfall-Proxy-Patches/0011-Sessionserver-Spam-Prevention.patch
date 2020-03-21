@@ -1,4 +1,4 @@
-From 626a8a2705078d55fd2ea3488dce77b6b6110e82 Mon Sep 17 00:00:00 2001
+From 9508546bd69d8fa6ffd2da89c8556e189d347d4f Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Sessionserver Spam Prevention
@@ -69,10 +69,10 @@ index 00000000..0c989cf4
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..6cb86037
+index 00000000..959415f3
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,106 @@
 +package net.md_5.bungee.connection;
 +
 +import net.md_5.bungee.config.Configuration;
@@ -96,11 +96,9 @@ index 00000000..6cb86037
 +    public void reload() {
 +        File file = new File("BLOCKED-IPS.yml");
 +        if (!file.exists()) {
-+            try {
-+                file.createNewFile();
-+            } catch (IOException e) {
-+                e.printStackTrace();
-+            }
++            enabled = false;
++            configuredBlockedIps = null;
++            return;
 +        }
 +
 +        try {
@@ -130,7 +128,7 @@ index 00000000..6cb86037
 +
 +    public static final class SpamInfo {
 +
-+        private final java.util.Set<String> names = new java.util.HashSet<>();
++        private final Set<String> names = new HashSet<>();
 +        private boolean killed;
 +        private int connections = 1;
 +        private long lastConnect = System.currentTimeMillis();
@@ -182,36 +180,54 @@ index 00000000..6cb86037
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index f5e20caf..82ff5c41 100644
+index f5e20caf..d33b61ec 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -361,6 +361,39 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -361,18 +361,49 @@ public class InitialHandler extends PacketHandler implements PendingConnection
      {
          Preconditions.checkState( thisState == State.USERNAME, "Not expecting USERNAME" );
          this.loginRequest = loginRequest;
+-
+-        if ( getName().contains( "." ) )
+-        {
+-            disconnect( bungee.getTranslation( "name_invalid" ) );
 +        // Luminu start - encryption spam prevention
++        String name = getName();
++        // Moved together and with instant channel close
++        // There are people with 1 and 2 character usernames, but they are unlikely to ever join
++        if (name.length() < 3 || name.length() > 16 || name.indexOf('.') != -1) {
++            ch.close();
+             return;
+         }
+ 
+-        if ( getName().length() > 16 )
+-        {
+-            disconnect( bungee.getTranslation( "name_too_long" ) );
+-            return;
 +        BlockedConnections blockedConnections = BlockedConnections.getInstance();
 +        if (blockedConnections.isEnabled()) {
 +            String hostName = getAddress().toString();
 +            int index = hostName.indexOf(':');
 +            hostName = index != -1 ? hostName.substring(0, index) : hostName;
++            // Config blocked
 +            if (blockedConnections.isConfigBlocked(hostName)) {
-+                // Config blocked
 +                ch.close();
 +                return;
 +            }
 +
 +            BlockedConnections.SpamInfo count = blockedConnections.getBlocked().get(hostName);
-+            String name = getName();
 +            if (count == null) {
++                // Create new
 +                blockedConnections.getBlocked().put(hostName, new BlockedConnections.SpamInfo(name));
 +            } else {
 +                count.incrementConnections();
 +                if (count.isKilled()) {
++                    // Close instantly
 +                    ch.close();
 +                    return;
 +                }
 +                if (count.getNames().add(name) && count.getNames().size() > 2) {
++                    // More than 2 different names over one ip = kill
 +                    count.kill();
 +                    ch.close();
 +                    bungee.getLogger().warning("KILLED: " + count.getNames());
@@ -220,12 +236,12 @@ index f5e20caf..82ff5c41 100644
 +
 +                count.setLastConnect();
 +            }
-+        }
+         }
 +        // Luminu end
  
-         if ( getName().contains( "." ) )
-         {
-@@ -465,7 +498,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+         int limit = BungeeCord.getInstance().config.getPlayerLimit();
+         if ( limit > 0 && bungee.getOnlineCount() > limit )
+@@ -465,7 +496,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                  } else
                  {
                      disconnect( bungee.getTranslation( "mojang_fail" ) );
