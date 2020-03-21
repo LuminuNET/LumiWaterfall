@@ -1,11 +1,11 @@
-From 5def11cfaafeeda1a43c6a8e0a520d9b469241d3 Mon Sep 17 00:00:00 2001
+From f60dce3f2999c7bcd03597cbd558bad68951e0fd Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 23:24:23 +0100
 Subject: [PATCH] message.properties changes
 
 
 diff --git a/proxy/src/main/resources/messages.properties b/proxy/src/main/resources/messages.properties
-index 6e3ef0a4..f1e3ea2d 100644
+index 6e3ef0a4..7982c871 100644
 --- a/proxy/src/main/resources/messages.properties
 +++ b/proxy/src/main/resources/messages.properties
 @@ -1,29 +1,29 @@
@@ -24,11 +24,12 @@ index 6e3ef0a4..f1e3ea2d 100644
 -fallback_lobby=\u00a7cCould not connect to target server, you have been moved to a fallback server.
 -lost_connection=[Proxy] Lost connection to server.
 -mojang_fail=Error occurred while contacting login servers, are they down?
+-no_permission=\u00a7cYou do not have permission to execute this command!
 +fallback_kick=\u00a7cDu konntest nicht auf die Lobby verbunden werden: {0}
 +fallback_lobby=\u00a78\u258f \u00a73Luminu \u00a78\u258f \u00a7cDu wurdest auf die Lobby gesendet, da der Zielserver aktuell nicht erreichbar ist.
 +lost_connection=\u00a7cDu hast die Verbindung zum Server verloren. \u00a7bBitte verbinde dich erneut mit dem Server.
 +mojang_fail=\u00a7cEs konnte keine Verbindung zu den Anmeldeservern aufgebaut werden!
- no_permission=\u00a7cYou do not have permission to execute this command!
++no_permission=Unknown command. Type "/help" for help.
  no_server=\u00a7cThe specified server does not exist.
  no_server_permission=\u00a7cYou don't have permission to access this server.
 -outdated_client=Outdated client! Please use {0}
