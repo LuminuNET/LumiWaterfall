@@ -1,4 +1,4 @@
-From 9508546bd69d8fa6ffd2da89c8556e189d347d4f Mon Sep 17 00:00:00 2001
+From a134a8ab4339a6b3cbfcb7a6b680138aa57c2e37 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Sessionserver Spam Prevention
@@ -18,10 +18,10 @@ index c343b5a2..a9de4e89 100644
          {
 diff --git a/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
 new file mode 100644
-index 00000000..0c989cf4
+index 00000000..3100abe9
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,56 @@
 +package net.md_5.bungee.command;
 +
 +import net.md_5.bungee.api.CommandSender;
@@ -35,6 +35,7 @@ index 00000000..0c989cf4
 +
 +    public CommandSpamFilter() {
 +        super("spamfilter", "command.spamfilter");
++        BlockedConnections.getInstance().reload();
 +    }
 +
 +    @Override
@@ -63,6 +64,16 @@ index 00000000..0c989cf4
 +            } else if (args[0].equals("reload")) {
 +                blockedConnections.reload();
 +                sender.sendMessage("reloaded");
++            }
++        } else if (args.length == 2) {
++            if (args[0].equalsIgnoreCase("remove")) {
++                blockedConnections.getBlocked().entrySet().removeIf(entry -> {
++                    final boolean toRemove = entry.getValue().getNames().contains(args[1]);
++                    if (toRemove) {
++                        sender.sendMessage("removed " + entry.getValue().getNames());
++                    }
++                    return toRemove;
++                });
 +            }
 +        }
 +    }
