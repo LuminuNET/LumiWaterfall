@@ -1,4 +1,4 @@
-From 2885feadba84805b7db6a7408fb3e96d0f6c1cc8 Mon Sep 17 00:00:00 2001
+From d5ec38be53c89b73d0bdcd6f162ff8d7e5de5da8 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Sessionserver Spam Prevention
@@ -191,10 +191,10 @@ index 00000000..959415f3
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 2c17f71d..8ac0d8a9 100644
+index 9f4379a8..b2332536 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -364,18 +364,49 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -362,18 +362,49 @@ public class InitialHandler extends PacketHandler implements PendingConnection
      {
          Preconditions.checkState( thisState == State.USERNAME, "Not expecting USERNAME" );
          this.loginRequest = loginRequest;
@@ -252,7 +252,7 @@ index 2c17f71d..8ac0d8a9 100644
  
          int limit = BungeeCord.getInstance().config.getPlayerLimit();
          if ( limit > 0 && bungee.getOnlineCount() > limit )
-@@ -468,7 +499,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -466,7 +497,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                  } else
                  {
                      disconnect( bungee.getTranslation( "mojang_fail" ) );
