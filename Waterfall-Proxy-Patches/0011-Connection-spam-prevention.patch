@@ -1,27 +1,27 @@
-From d5ec38be53c89b73d0bdcd6f162ff8d7e5de5da8 Mon Sep 17 00:00:00 2001
+From 2ffbb426abe0ef04362b875e1ff4159d6d5831ea Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
-Subject: [PATCH] Sessionserver Spam Prevention
+Subject: [PATCH] Connection spam prevention
 
 
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index c343b5a2..a9de4e89 100644
+index c343b5a2..b79096c2 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 @@ -231,6 +231,7 @@ public class BungeeCord extends ProxyServer
          getPluginManager().registerCommand( null, new CommandIP() );
          getPluginManager().registerCommand( null, new CommandBungee() );
          getPluginManager().registerCommand( null, new CommandPerms() );
-+        getPluginManager().registerCommand(null, new net.md_5.bungee.command.CommandSpamFilter()); // Luminu - encryption spam prevention
++        getPluginManager().registerCommand(null, new net.md_5.bungee.command.CommandSpamFilter()); // Luminu - connection spam prevention
  
          if ( !Boolean.getBoolean( "net.md_5.bungee.native.disable" ) )
          {
 diff --git a/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
 new file mode 100644
-index 00000000..3100abe9
+index 00000000..b8afba4e
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,67 @@
 +package net.md_5.bungee.command;
 +
 +import net.md_5.bungee.api.CommandSender;
@@ -30,7 +30,7 @@ index 00000000..3100abe9
 +
 +import java.util.Map;
 +
-+// Luminu - encryption spam prevention
++// Luminu - connection spam prevention
 +public final class CommandSpamFilter extends Command {
 +
 +    public CommandSpamFilter() {
@@ -42,28 +42,39 @@ index 00000000..3100abe9
 +    public void execute(CommandSender sender, String[] args) {
 +        BlockedConnections blockedConnections = BlockedConnections.getInstance();
 +        if (args.length == 0) {
-+            sender.sendMessage("blocked:");
-+
-+            for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
-+                if (entry.getValue().isKilled()) {
-+                    sender.sendMessage(entry.toString());
-+                }
-+            }
++            sender.sendMessage("/spamfilter <console/list/clean/empty/reload>");
 +        } else if (args.length == 1) {
-+            if (args[0].equals("console")) {
-+                for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
-+                    if (entry.getValue().isKilled()) {
-+                        System.out.println(entry);
++            switch (args[0]) {
++                case "console":
++                    for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
++                        if (entry.getValue().isKilled()) {
++                            System.out.println(entry);
++                        }
 +                    }
-+                }
-+                sender.sendMessage("dumped to console");
-+            } else if (args[0].equals("clean")) {
-+                // Remove non kill-switched with 30 seconds of no activity
-+                blockedConnections.getBlocked().entrySet().removeIf(next -> !next.getValue().isKilled() && System.currentTimeMillis() - next.getValue().getLastConnect() > 45_000);
-+                sender.sendMessage("cleaned");
-+            } else if (args[0].equals("reload")) {
-+                blockedConnections.reload();
-+                sender.sendMessage("reloaded");
++                    sender.sendMessage("dumped to console");
++                    break;
++                case "list":
++                    sender.sendMessage("blocked:");
++                    for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
++                        if (entry.getValue().isKilled()) {
++                            sender.sendMessage(entry.toString());
++                        }
++                    }
++                    break;
++                case "clean":
++                    // Remove non kill-switched with 30 seconds of no activity
++                    blockedConnections.getBlocked().entrySet().removeIf(next -> !next.getValue().isKilled() && System.currentTimeMillis() - next.getValue().getLastConnect() > 45_000);
++                    sender.sendMessage("cleaned");
++                    break;
++                case "empty":
++                    // Remove all cached
++                    blockedConnections.getBlocked().clear();
++                    sender.sendMessage("emptied blocked cached");
++                    break;
++                case "reload":
++                    blockedConnections.reload();
++                    sender.sendMessage("reloaded");
++                    break;
 +            }
 +        } else if (args.length == 2) {
 +            if (args[0].equalsIgnoreCase("remove")) {
@@ -80,10 +91,10 @@ index 00000000..3100abe9
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..959415f3
+index 00000000..71135a06
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,143 @@
 +package net.md_5.bungee.connection;
 +
 +import net.md_5.bungee.config.Configuration;
@@ -91,35 +102,52 @@ index 00000000..959415f3
 +
 +import java.io.File;
 +import java.io.IOException;
++import java.util.ArrayList;
 +import java.util.HashMap;
 +import java.util.HashSet;
++import java.util.List;
 +import java.util.Map;
 +import java.util.Set;
 +
-+// Luminu - encryption spam prevention
++// Luminu - connection spam prevention
 +public final class BlockedConnections {
 +
 +    private static final BlockedConnections INSTANCE = new BlockedConnections();
++
++    // Pre handler creation
++    private static final long CHECK_CONNECTIONS_DELAY = 1500;
++    private final List<Long> connections = new ArrayList<>();
++    private long connectionLimitSpan; // timespan to limit connections in
++    private int connectionLimit = -1; // how many connections are allowed in the given time
++    private long lastConnectionListCheck = -1;
++
++    // Handshake collected data
 +    private final Map<String, SpamInfo> blocked = new HashMap<>(); // blocked during uptime
 +    private Set<String> configuredBlockedIps; // configured to be blocked
-+    private boolean enabled;
++    private boolean usernameCheckEnabled;
 +
 +    public void reload() {
-+        File file = new File("BLOCKED-IPS.yml");
++        File file = new File("connection-spam-config.yml");
 +        if (!file.exists()) {
-+            enabled = false;
++            usernameCheckEnabled = false;
 +            configuredBlockedIps = null;
++            connectionLimit = -1;
++            lastConnectionListCheck = -1;
++            connections.clear();
 +            return;
 +        }
 +
 +        try {
 +            Configuration config = YamlConfiguration.getProvider(YamlConfiguration.class).load(new File("BLOCKED-IPS.yml"));
-+            enabled = config.getBoolean("enabled", false);
-+            if (enabled) {
++            usernameCheckEnabled = config.getBoolean("enabled", false);
++            if (usernameCheckEnabled) {
 +                configuredBlockedIps = new HashSet<>(config.getStringList("blocked-ips"));
 +            } else {
 +                configuredBlockedIps = null;
 +            }
++
++            connectionLimit = config.getInt("connection-limit", 200);
++            connectionLimitSpan = config.getLong("connection-limit-millis", 10_000);
 +        } catch (IOException e) {
 +            e.printStackTrace();
 +        }
@@ -133,8 +161,28 @@ index 00000000..959415f3
 +        return blocked;
 +    }
 +
-+    public boolean isEnabled() {
-+        return enabled;
++    public boolean isUsernameCheckEnabled() {
++        return usernameCheckEnabled;
++    }
++
++    public boolean shouldBlockConnection() {
++        if (connectionLimit == -1) return false;
++
++        long currentTimeMillis = System.currentTimeMillis();
++        if (currentTimeMillis - lastConnectionListCheck > CHECK_CONNECTIONS_DELAY) {
++            // Remove outdated connection timestamps
++            lastConnectionListCheck = currentTimeMillis;
++            synchronized (connections) {
++                connections.removeIf(timestamp -> currentTimeMillis - timestamp > connectionLimitSpan);
++                connections.add(currentTimeMillis);
++            }
++        } else {
++            synchronized (connections) {
++                connections.add(currentTimeMillis);
++            }
++        }
++
++        return connections.size() >= connectionLimit;
 +    }
 +
 +    public static final class SpamInfo {
@@ -191,7 +239,7 @@ index 00000000..959415f3
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 9f4379a8..b2332536 100644
+index 9f4379a8..7c0f3e4c 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -362,18 +362,49 @@ public class InitialHandler extends PacketHandler implements PendingConnection
@@ -202,7 +250,7 @@ index 9f4379a8..b2332536 100644
 -        if ( getName().contains( "." ) )
 -        {
 -            disconnect( bungee.getTranslation( "name_invalid" ) );
-+        // Luminu start - encryption spam prevention
++        // Luminu start - connection spam prevention
 +        String name = getName();
 +        // Moved together and with instant channel close
 +        // There are people with 1 and 2 character usernames, but they are unlikely to ever join
@@ -216,7 +264,7 @@ index 9f4379a8..b2332536 100644
 -            disconnect( bungee.getTranslation( "name_too_long" ) );
 -            return;
 +        BlockedConnections blockedConnections = BlockedConnections.getInstance();
-+        if (blockedConnections.isEnabled()) {
++        if (blockedConnections.isUsernameCheckEnabled()) {
 +            String hostName = getAddress().toString();
 +            int index = hostName.indexOf(':');
 +            hostName = index != -1 ? hostName.substring(0, index) : hostName;
@@ -257,10 +305,27 @@ index 9f4379a8..b2332536 100644
                  {
                      disconnect( bungee.getTranslation( "mojang_fail" ) );
 -                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
-+                    bungee.getLogger().log(Level.SEVERE, "AUTH: " + getName() + "-" + getAddress()); // Luminu - encryption spam
++                    bungee.getLogger().log(Level.SEVERE, "AUTH: " + getName() + "-" + getAddress()); // Luminu - connection spam prevention
                  }
              }
          };
+diff --git a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
+index 9a39f69e..5de861c9 100644
+--- a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
++++ b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
+@@ -58,6 +58,12 @@ public class PipelineUtils
+         @Override
+         protected void initChannel(Channel ch) throws Exception
+         {
++            // Luminu start - connection spam prevention
++            if (net.md_5.bungee.connection.BlockedConnections.getInstance().shouldBlockConnection()) {
++                ch.close();
++                return;
++            }
++            // Luminu end
+             SocketAddress remoteAddress = ( ch.remoteAddress() == null ) ? ch.parent().localAddress() : ch.remoteAddress();
+ 
+             if ( BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle( remoteAddress ) )
 -- 
 2.26.0.windows.1
 
