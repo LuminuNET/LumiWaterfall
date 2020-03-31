@@ -1,4 +1,4 @@
-From 2ffbb426abe0ef04362b875e1ff4159d6d5831ea Mon Sep 17 00:00:00 2001
+From 43bffca75799122b2eedaca6e778dda2e5da8ef5 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Connection spam prevention
@@ -91,7 +91,7 @@ index 00000000..b8afba4e
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..71135a06
+index 00000000..49a7350d
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 @@ -0,0 +1,143 @@
@@ -138,8 +138,8 @@ index 00000000..71135a06
 +        }
 +
 +        try {
-+            Configuration config = YamlConfiguration.getProvider(YamlConfiguration.class).load(new File("BLOCKED-IPS.yml"));
-+            usernameCheckEnabled = config.getBoolean("enabled", false);
++            Configuration config = YamlConfiguration.getProvider(YamlConfiguration.class).load(file);
++            usernameCheckEnabled = config.getBoolean("ip-blocker", false);
 +            if (usernameCheckEnabled) {
 +                configuredBlockedIps = new HashSet<>(config.getStringList("blocked-ips"));
 +            } else {
