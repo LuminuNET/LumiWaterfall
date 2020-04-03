@@ -1,4 +1,4 @@
-From 43bffca75799122b2eedaca6e778dda2e5da8ef5 Mon Sep 17 00:00:00 2001
+From a5d7563497714523726b5f18872d6ed72ea1f133 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Connection spam prevention
@@ -91,12 +91,13 @@ index 00000000..b8afba4e
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..49a7350d
+index 00000000..3f5a4a66
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,152 @@
 +package net.md_5.bungee.connection;
 +
++import net.md_5.bungee.api.ProxyServer;
 +import net.md_5.bungee.config.Configuration;
 +import net.md_5.bungee.config.YamlConfiguration;
 +
@@ -115,11 +116,13 @@ index 00000000..49a7350d
 +    private static final BlockedConnections INSTANCE = new BlockedConnections();
 +
 +    // Pre handler creation
++    private static final long WARN_DELAY = 3000;
 +    private static final long CHECK_CONNECTIONS_DELAY = 1500;
 +    private final List<Long> connections = new ArrayList<>();
 +    private long connectionLimitSpan; // timespan to limit connections in
 +    private int connectionLimit = -1; // how many connections are allowed in the given time
 +    private long lastConnectionListCheck = -1;
++    private long warnTimeout = -1;
 +
 +    // Handshake collected data
 +    private final Map<String, SpamInfo> blocked = new HashMap<>(); // blocked during uptime
@@ -127,13 +130,14 @@ index 00000000..49a7350d
 +    private boolean usernameCheckEnabled;
 +
 +    public void reload() {
++        connections.clear();
++
 +        File file = new File("connection-spam-config.yml");
 +        if (!file.exists()) {
 +            usernameCheckEnabled = false;
 +            configuredBlockedIps = null;
 +            connectionLimit = -1;
 +            lastConnectionListCheck = -1;
-+            connections.clear();
 +            return;
 +        }
 +
@@ -182,7 +186,12 @@ index 00000000..49a7350d
 +            }
 +        }
 +
-+        return connections.size() >= connectionLimit;
++        final boolean block = connections.size() >= connectionLimit;
++        if (block && warnTimeout < currentTimeMillis) {
++            ProxyServer.getInstance().getLogger().warning("Connections in the last ~" + connectionLimitSpan + "ms (+-1500ms): " + connections.size());
++            warnTimeout = currentTimeMillis + WARN_DELAY;
++        }
++        return block;
 +    }
 +
 +    public static final class SpamInfo {
