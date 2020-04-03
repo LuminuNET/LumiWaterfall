@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 
 case "$1" in
+    # Merge upstream
+    "update" | "u")
+    (
+        cd "$basedir"
+        scripts/mergeUpstream.sh up
+        ./lumi patch
+    )
+    ;;
+    # Commit and push the upstream merge changes
+    "upush" | "updatepush")
+    (
+        cd "$basedir"
+        ./lumi rb
+        git add .
+        ./scripts/upstreamCommit.sh
+        git push
+    )
+    ;;
     "rb" | "rbp" | "rebuild")
         scripts/rebuildPatches.sh
     ;;
