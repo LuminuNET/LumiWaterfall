@@ -1,9 +1,29 @@
-From a5d7563497714523726b5f18872d6ed72ea1f133 Mon Sep 17 00:00:00 2001
+From a5561a2bcc99941afb782c2b9e4916b7b84b213d Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Connection spam prevention
 
 
+diff --git a/proxy/pom.xml b/proxy/pom.xml
+index 912e50f4..9090997a 100644
+--- a/proxy/pom.xml
++++ b/proxy/pom.xml
+@@ -120,6 +120,15 @@
+             <scope>runtime</scope>
+         </dependency>
+         <!-- Waterfall end -->
++
++        <!-- Luminu start - GeoLite database -->
++        <dependency>
++            <groupId>com.maxmind.geoip2</groupId>
++            <artifactId>geoip2</artifactId>
++            <version>2.13.1</version>
++            <scope>compile</scope>
++        </dependency>
++        <!-- Luminu end -->
+     </dependencies>
+ 
+     <build>
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 index c343b5a2..b79096c2 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
@@ -18,160 +38,147 @@ index c343b5a2..b79096c2 100644
          {
 diff --git a/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
 new file mode 100644
-index 00000000..b8afba4e
+index 00000000..860e505b
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/command/CommandSpamFilter.java
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,39 @@
 +package net.md_5.bungee.command;
 +
 +import net.md_5.bungee.api.CommandSender;
 +import net.md_5.bungee.api.plugin.Command;
 +import net.md_5.bungee.connection.BlockedConnections;
 +
-+import java.util.Map;
++import java.io.IOException;
 +
 +// Luminu - connection spam prevention
 +public final class CommandSpamFilter extends Command {
 +
 +    public CommandSpamFilter() {
 +        super("spamfilter", "command.spamfilter");
-+        BlockedConnections.getInstance().reload();
++        try {
++            BlockedConnections.getInstance().reload();
++        } catch (IOException e) {
++            e.printStackTrace();
++        }
 +    }
 +
 +    @Override
 +    public void execute(CommandSender sender, String[] args) {
 +        BlockedConnections blockedConnections = BlockedConnections.getInstance();
 +        if (args.length == 0) {
-+            sender.sendMessage("/spamfilter <console/list/clean/empty/reload>");
++            sender.sendMessage("/spamfilter <reload>");
 +        } else if (args.length == 1) {
 +            switch (args[0]) {
-+                case "console":
-+                    for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
-+                        if (entry.getValue().isKilled()) {
-+                            System.out.println(entry);
-+                        }
-+                    }
-+                    sender.sendMessage("dumped to console");
-+                    break;
-+                case "list":
-+                    sender.sendMessage("blocked:");
-+                    for (Map.Entry<String, BlockedConnections.SpamInfo> entry : blockedConnections.getBlocked().entrySet()) {
-+                        if (entry.getValue().isKilled()) {
-+                            sender.sendMessage(entry.toString());
-+                        }
-+                    }
-+                    break;
-+                case "clean":
-+                    // Remove non kill-switched with 30 seconds of no activity
-+                    blockedConnections.getBlocked().entrySet().removeIf(next -> !next.getValue().isKilled() && System.currentTimeMillis() - next.getValue().getLastConnect() > 45_000);
-+                    sender.sendMessage("cleaned");
-+                    break;
-+                case "empty":
-+                    // Remove all cached
-+                    blockedConnections.getBlocked().clear();
-+                    sender.sendMessage("emptied blocked cached");
-+                    break;
 +                case "reload":
-+                    blockedConnections.reload();
-+                    sender.sendMessage("reloaded");
-+                    break;
-+            }
-+        } else if (args.length == 2) {
-+            if (args[0].equalsIgnoreCase("remove")) {
-+                blockedConnections.getBlocked().entrySet().removeIf(entry -> {
-+                    final boolean toRemove = entry.getValue().getNames().contains(args[1]);
-+                    if (toRemove) {
-+                        sender.sendMessage("removed " + entry.getValue().getNames());
++                    try {
++                        blockedConnections.reload();
++                        sender.sendMessage("reloaded");
++                    } catch (IOException e) {
++                        e.printStackTrace();
 +                    }
-+                    return toRemove;
-+                });
++                    break;
 +            }
 +        }
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..3f5a4a66
+index 00000000..c9cc8df5
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,141 @@
 +package net.md_5.bungee.connection;
 +
++import com.google.common.cache.CacheBuilder;
++import com.google.common.cache.CacheLoader;
++import com.google.common.cache.LoadingCache;
++import com.maxmind.geoip2.DatabaseReader;
++import com.maxmind.geoip2.exception.AddressNotFoundException;
++import com.maxmind.geoip2.exception.GeoIp2Exception;
++import com.maxmind.geoip2.model.CountryResponse;
++import com.maxmind.geoip2.record.Country;
 +import net.md_5.bungee.api.ProxyServer;
 +import net.md_5.bungee.config.Configuration;
 +import net.md_5.bungee.config.YamlConfiguration;
 +
 +import java.io.File;
 +import java.io.IOException;
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.SocketAddress;
 +import java.util.ArrayList;
-+import java.util.HashMap;
 +import java.util.HashSet;
 +import java.util.List;
-+import java.util.Map;
 +import java.util.Set;
++import java.util.concurrent.ExecutionException;
++import java.util.concurrent.TimeUnit;
 +
 +// Luminu - connection spam prevention
 +public final class BlockedConnections {
 +
 +    private static final BlockedConnections INSTANCE = new BlockedConnections();
-+
-+    // Pre handler creation
 +    private static final long WARN_DELAY = 3000;
 +    private static final long CHECK_CONNECTIONS_DELAY = 1500;
++
 +    private final List<Long> connections = new ArrayList<>();
 +    private long connectionLimitSpan; // timespan to limit connections in
 +    private int connectionLimit = -1; // how many connections are allowed in the given time
 +    private long lastConnectionListCheck = -1;
 +    private long warnTimeout = -1;
 +
-+    // Handshake collected data
-+    private final Map<String, SpamInfo> blocked = new HashMap<>(); // blocked during uptime
-+    private Set<String> configuredBlockedIps; // configured to be blocked
-+    private boolean usernameCheckEnabled;
++    private Set<String> allowedCountryCodes;
++    private LoadingCache<InetAddress, Boolean> geoLiteCache;
++    private DatabaseReader geoLiteReader;
++    private boolean enableGeoLiteLookups;
++    private long blockedViaGeoLite;
 +
-+    public void reload() {
++    public void reload() throws IOException {
++        enableGeoLiteLookups = false;
++        connectionLimit = -1;
 +        connections.clear();
++        lastConnectionListCheck = -1;
 +
 +        File file = new File("connection-spam-config.yml");
-+        if (!file.exists()) {
-+            usernameCheckEnabled = false;
-+            configuredBlockedIps = null;
-+            connectionLimit = -1;
-+            lastConnectionListCheck = -1;
-+            return;
-+        }
++        if (!file.exists()) return;
 +
-+        try {
-+            Configuration config = YamlConfiguration.getProvider(YamlConfiguration.class).load(file);
-+            usernameCheckEnabled = config.getBoolean("ip-blocker", false);
-+            if (usernameCheckEnabled) {
-+                configuredBlockedIps = new HashSet<>(config.getStringList("blocked-ips"));
-+            } else {
-+                configuredBlockedIps = null;
++        Configuration config = YamlConfiguration.getProvider(YamlConfiguration.class).load(file);
++        connectionLimit = config.getInt("connection-limit", 200);
++        connectionLimitSpan = config.getLong("connection-limit-millis", 10_000);
++
++        enableGeoLiteLookups = config.getBoolean("enable-geolite-checks", false);
++        File database;
++        if (enableGeoLiteLookups && (database = new File("GeoLite2-Country.mmdb")).exists()) {
++            allowedCountryCodes = new HashSet<>(config.getStringList("allowed-country-codes"));
++            geoLiteReader = new DatabaseReader.Builder(database).build();
++            geoLiteCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).concurrencyLevel(Runtime.getRuntime().availableProcessors()).initialCapacity(100).maximumSize(35_000).build(new CacheLoader<InetAddress, Boolean>() {
++                @Override
++                public Boolean load(InetAddress address) throws Exception {
++                    CountryResponse response = null;
++                    try {
++                        response = geoLiteReader.country(address);
++                    } catch (AddressNotFoundException ignored) {
++                    } catch (IOException | GeoIp2Exception e) {
++                        e.printStackTrace();
++                    }
++
++                    if (response == null) return false;
++
++                    Country country = response.getCountry();
++                    return allowedCountryCodes.contains(country.getIsoCode());
++                }
++            });
++        } else {
++            if (geoLiteCache != null) {
++                geoLiteCache.invalidateAll();
++                geoLiteCache = null;
 +            }
-+
-+            connectionLimit = config.getInt("connection-limit", 200);
-+            connectionLimitSpan = config.getLong("connection-limit-millis", 10_000);
-+        } catch (IOException e) {
-+            e.printStackTrace();
 +        }
 +    }
 +
-+    public boolean isConfigBlocked(String address) {
-+        return configuredBlockedIps.contains(address);
-+    }
++    public boolean shouldBlockConnection(final SocketAddress socketAddress) {
++        if (!enableGeoLiteLookups && connectionLimit == -1) return false;
 +
-+    public Map<String, SpamInfo> getBlocked() {
-+        return blocked;
-+    }
-+
-+    public boolean isUsernameCheckEnabled() {
-+        return usernameCheckEnabled;
-+    }
-+
-+    public boolean shouldBlockConnection() {
-+        if (connectionLimit == -1) return false;
-+
++        // Add to last connections
 +        long currentTimeMillis = System.currentTimeMillis();
 +        if (currentTimeMillis - lastConnectionListCheck > CHECK_CONNECTIONS_DELAY) {
 +            // Remove outdated connection timestamps
@@ -186,72 +193,46 @@ index 00000000..3f5a4a66
 +            }
 +        }
 +
-+        final boolean block = connections.size() >= connectionLimit;
-+        if (block && warnTimeout < currentTimeMillis) {
-+            ProxyServer.getInstance().getLogger().warning("Connections in the last ~" + connectionLimitSpan + "ms (+-1500ms): " + connections.size());
-+            warnTimeout = currentTimeMillis + WARN_DELAY;
++        // GeoLite check
++        if (enableGeoLiteLookups && socketAddress instanceof InetSocketAddress) {
++            InetAddress address = ((InetSocketAddress) socketAddress).getAddress();
++            try {
++                if (geoLiteCache.get(address)) {
++                    blockedViaGeoLite++;
++                    if (warnTimeout < currentTimeMillis) {
++                        ProxyServer.getInstance().getLogger().warning("Connections in the last ~" + connectionLimitSpan + "ms (+-1500ms): " + connections.size()
++                                + " (blocked via GeoLite since uptime: " + blockedViaGeoLite + ")");
++                        warnTimeout = currentTimeMillis + WARN_DELAY;
++                    }
++                    return true;
++                }
++            } catch (ExecutionException e) {
++                e.printStackTrace();
++            }
 +        }
-+        return block;
++
++        // Connection limit check
++        if (connectionLimit != -1 && connections.size() >= connectionLimit) {
++            if (warnTimeout < currentTimeMillis) {
++                ProxyServer.getInstance().getLogger().warning("Connections in the last ~" + connectionLimitSpan + "ms (+-1500ms): " + connections.size());
++                warnTimeout = currentTimeMillis + WARN_DELAY;
++            }
++            return true;
++        }
++
++        return false;
 +    }
 +
-+    public static final class SpamInfo {
-+
-+        private final Set<String> names = new HashSet<>();
-+        private boolean killed;
-+        private int connections = 1;
-+        private long lastConnect = System.currentTimeMillis();
-+
-+        public SpamInfo(String firstName) {
-+            names.add(firstName);
-+        }
-+
-+        public Set<String> getNames() {
-+            return names;
-+        }
-+
-+        public void kill() {
-+            this.killed = true;
-+        }
-+
-+        public boolean isKilled() {
-+            return killed;
-+        }
-+
-+        public int getConnections() {
-+            return connections;
-+        }
-+
-+        public void incrementConnections() {
-+            this.connections++;
-+        }
-+
-+        public long getLastConnect() {
-+            return lastConnect;
-+        }
-+
-+        public void setLastConnect() {
-+            this.lastConnect = System.currentTimeMillis();
-+        }
-+
-+        @Override
-+        public String toString() {
-+            return "SpamInfo{" +
-+                    "kill=" + killed +
-+                    ", names=" + names +
-+                    ", count=" + connections +
-+                    '}';
-+        }
-+    }
 +
 +    public static BlockedConnections getInstance() {
 +        return INSTANCE;
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 9f4379a8..7c0f3e4c 100644
+index 9f4379a8..75363cf6 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -362,18 +362,49 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -362,18 +362,15 @@ public class InitialHandler extends PacketHandler implements PendingConnection
      {
          Preconditions.checkState( thisState == State.USERNAME, "Not expecting USERNAME" );
          this.loginRequest = loginRequest;
@@ -259,6 +240,12 @@ index 9f4379a8..7c0f3e4c 100644
 -        if ( getName().contains( "." ) )
 -        {
 -            disconnect( bungee.getTranslation( "name_invalid" ) );
+-            return;
+-        }
+-
+-        if ( getName().length() > 16 )
+-        {
+-            disconnect( bungee.getTranslation( "name_too_long" ) );
 +        // Luminu start - connection spam prevention
 +        String name = getName();
 +        // Moved together and with instant channel close
@@ -267,49 +254,11 @@ index 9f4379a8..7c0f3e4c 100644
 +            ch.close();
              return;
          }
- 
--        if ( getName().length() > 16 )
--        {
--            disconnect( bungee.getTranslation( "name_too_long" ) );
--            return;
-+        BlockedConnections blockedConnections = BlockedConnections.getInstance();
-+        if (blockedConnections.isUsernameCheckEnabled()) {
-+            String hostName = getAddress().toString();
-+            int index = hostName.indexOf(':');
-+            hostName = index != -1 ? hostName.substring(0, index) : hostName;
-+            // Config blocked
-+            if (blockedConnections.isConfigBlocked(hostName)) {
-+                ch.close();
-+                return;
-+            }
-+
-+            BlockedConnections.SpamInfo count = blockedConnections.getBlocked().get(hostName);
-+            if (count == null) {
-+                // Create new
-+                blockedConnections.getBlocked().put(hostName, new BlockedConnections.SpamInfo(name));
-+            } else {
-+                count.incrementConnections();
-+                if (count.isKilled()) {
-+                    // Close instantly
-+                    ch.close();
-+                    return;
-+                }
-+                if (count.getNames().add(name) && count.getNames().size() > 2) {
-+                    // More than 2 different names over one ip = kill
-+                    count.kill();
-+                    ch.close();
-+                    bungee.getLogger().warning("KILLED: " + count.getNames());
-+                    return;
-+                }
-+
-+                count.setLastConnect();
-+            }
-         }
 +        // Luminu end
  
          int limit = BungeeCord.getInstance().config.getPlayerLimit();
          if ( limit > 0 && bungee.getOnlineCount() > limit )
-@@ -466,7 +497,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -466,7 +463,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                  } else
                  {
                      disconnect( bungee.getTranslation( "mojang_fail" ) );
@@ -319,22 +268,22 @@ index 9f4379a8..7c0f3e4c 100644
              }
          };
 diff --git a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
-index 9a39f69e..5de861c9 100644
+index 9a39f69e..5614fed1 100644
 --- a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
 +++ b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
-@@ -58,6 +58,12 @@ public class PipelineUtils
-         @Override
+@@ -59,6 +59,12 @@ public class PipelineUtils
          protected void initChannel(Channel ch) throws Exception
          {
+             SocketAddress remoteAddress = ( ch.remoteAddress() == null ) ? ch.parent().localAddress() : ch.remoteAddress();
 +            // Luminu start - connection spam prevention
-+            if (net.md_5.bungee.connection.BlockedConnections.getInstance().shouldBlockConnection()) {
++            if (net.md_5.bungee.connection.BlockedConnections.getInstance().shouldBlockConnection(remoteAddress)) {
 +                ch.close();
 +                return;
 +            }
 +            // Luminu end
-             SocketAddress remoteAddress = ( ch.remoteAddress() == null ) ? ch.parent().localAddress() : ch.remoteAddress();
  
              if ( BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle( remoteAddress ) )
+             {
 -- 
 2.26.0.windows.1
 
