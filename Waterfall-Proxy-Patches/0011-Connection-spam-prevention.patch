@@ -164,7 +164,7 @@ index 00000000..c9cc8df5
 +                    if (response == null) return false;
 +
 +                    Country country = response.getCountry();
-+                    return allowedCountryCodes.contains(country.getIsoCode());
++                    return !allowedCountryCodes.contains(country.getIsoCode());
 +                }
 +            });
 +        } else {
