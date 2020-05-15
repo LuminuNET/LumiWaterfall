@@ -1,4 +1,4 @@
-From 9e7a7dcce085fe76b7610a8a6b62c190ca913e9c Mon Sep 17 00:00:00 2001
+From 69d498e197faeafd598331ab40ff9ccdd0e23a5f Mon Sep 17 00:00:00 2001
 From: Troy Frew <fuzzy_bot@arenaga.me>
 Date: Tue, 15 Nov 2016 08:56:43 -0500
 Subject: [PATCH] POM Changes
@@ -396,7 +396,7 @@ index f8b549dc..09865be9 100644
      <version>1.15-SNAPSHOT</version>
      <packaging>jar</packaging>
 diff --git a/pom.xml b/pom.xml
-index 37bdaf3d..62524f43 100644
+index c9531d39..8e899b32 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -4,20 +4,20 @@
@@ -484,7 +484,7 @@ index 4592e2b3..7819877a 100644
              <version>${project.version}</version>
              <scope>compile</scope>
 diff --git a/proxy/pom.xml b/proxy/pom.xml
-index 54500dde..912e50f4 100644
+index 0341a6bc..8b06957d 100644
 --- a/proxy/pom.xml
 +++ b/proxy/pom.xml
 @@ -4,13 +4,13 @@
@@ -517,7 +517,7 @@ index 54500dde..912e50f4 100644
  
      <dependencies>
          <dependency>
-@@ -42,14 +43,14 @@
+@@ -36,14 +37,14 @@
              <version>${netty.version}</version>
              <scope>compile</scope>
          </dependency>
@@ -534,7 +534,7 @@ index 54500dde..912e50f4 100644
          <dependency>
              <groupId>io.netty</groupId>
              <artifactId>netty-handler</artifactId>
-@@ -64,31 +65,31 @@
+@@ -58,31 +59,31 @@
              <scope>compile</scope>
          </dependency>
          <dependency>
@@ -620,5 +620,5 @@ index c3a29122..f88f2f88 100644
              <version>${project.version}</version>
              <scope>compile</scope>
 -- 
-2.25.0.windows.1
+2.26.2.windows.1
 

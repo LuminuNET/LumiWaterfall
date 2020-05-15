@@ -1,11 +1,11 @@
-From a5561a2bcc99941afb782c2b9e4916b7b84b213d Mon Sep 17 00:00:00 2001
+From dc37d4e6ad903a8a9fd562b0d019ff7b79d3e19f Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Connection spam prevention
 
 
 diff --git a/proxy/pom.xml b/proxy/pom.xml
-index 912e50f4..9090997a 100644
+index 8b06957d..3673b19b 100644
 --- a/proxy/pom.xml
 +++ b/proxy/pom.xml
 @@ -120,6 +120,15 @@
@@ -25,10 +25,10 @@ index 912e50f4..9090997a 100644
  
      <build>
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index c343b5a2..b79096c2 100644
+index 1a2064de..a8b0115a 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -231,6 +231,7 @@ public class BungeeCord extends ProxyServer
+@@ -233,6 +233,7 @@ public class BungeeCord extends ProxyServer
          getPluginManager().registerCommand( null, new CommandIP() );
          getPluginManager().registerCommand( null, new CommandBungee() );
          getPluginManager().registerCommand( null, new CommandPerms() );
@@ -83,7 +83,7 @@ index 00000000..860e505b
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 new file mode 100644
-index 00000000..c9cc8df5
+index 00000000..78773967
 --- /dev/null
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/BlockedConnections.java
 @@ -0,0 +1,141 @@
@@ -229,7 +229,7 @@ index 00000000..c9cc8df5
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 9f4379a8..75363cf6 100644
+index 6a1c76d0..6ba35965 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -362,18 +362,15 @@ public class InitialHandler extends PacketHandler implements PendingConnection
@@ -285,5 +285,5 @@ index 9a39f69e..5614fed1 100644
              if ( BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle( remoteAddress ) )
              {
 -- 
-2.26.0.windows.1
+2.26.2.windows.1
 

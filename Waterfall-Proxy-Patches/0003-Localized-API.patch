@@ -1,4 +1,4 @@
-From 15b00c7154f7a759d08037968db83755ed2b9d5b Mon Sep 17 00:00:00 2001
+From e5cfc713cc27984f8e5cb616b512a8e1b1c1f324 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 21:45:33 +0100
 Subject: [PATCH] Localized API
@@ -269,10 +269,10 @@ index b372d957..5b842c80 100644
 +    void setLocale(java.util.Locale locale); // Luminu - locale
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index a7da577b..84aeb23b 100644
+index bbe5630f..c7be74fe 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -99,6 +99,7 @@ import net.md_5.bungee.util.CaseInsensitiveMap;
+@@ -101,6 +101,7 @@ import net.md_5.bungee.util.CaseInsensitiveMap;
  public class BungeeCord extends ProxyServer
  {
  
@@ -281,7 +281,7 @@ index a7da577b..84aeb23b 100644
       * Current operation state.
       */
 diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
-index b609f5ae..b481dbac 100644
+index 721166d0..11eef7fc 100644
 --- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 +++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 @@ -75,6 +75,11 @@ public final class UserConnection implements ProxiedPlayer
@@ -322,7 +322,7 @@ index b609f5ae..b481dbac 100644
 +    // Luminu end
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 1d9e39fc..29a317a7 100644
+index 2d61ce6b..b7691b8c 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -70,6 +70,7 @@ import net.md_5.bungee.util.QuietException;
@@ -351,5 +351,5 @@ index 1d9e39fc..29a317a7 100644
 +    // Luminu end
  }
 -- 
-2.25.0.windows.1
+2.26.2.windows.1
 
