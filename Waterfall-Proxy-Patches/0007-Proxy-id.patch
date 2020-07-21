@@ -1,4 +1,4 @@
-From 89d9a41f56aeaf7d6d924278e10b4411560a2a6b Mon Sep 17 00:00:00 2001
+From b4f262d600697689dcd65951c5316b2abe2bb819 Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 22:14:03 +0100
 Subject: [PATCH] Proxy id
@@ -23,10 +23,10 @@ index ba60fc6b..e2ce14da 100644
 +    // Luminu end
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index 0d45a243..1a2064de 100644
+index 175261df..0691d746 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -102,6 +102,7 @@ public class BungeeCord extends ProxyServer
+@@ -101,6 +101,7 @@ public class BungeeCord extends ProxyServer
  {
  
      @Getter @Setter private net.luminu.bungee.api.locale.BungeeLocaleProvider localeProvider;  // Luminu - localeprovider
@@ -80,5 +80,5 @@ index 6b3c28f7..b6476679 100644
  
          if ( !options.has( "noconsole" ) )
 -- 
-2.26.2.windows.1
+2.27.0.windows.1
 

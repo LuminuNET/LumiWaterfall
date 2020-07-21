@@ -1,14 +1,14 @@
-From dc37d4e6ad903a8a9fd562b0d019ff7b79d3e19f Mon Sep 17 00:00:00 2001
+From 0a3aa5b404a06a164d957bf7e00f919905c90f6c Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Sat, 21 Mar 2020 19:50:42 +0100
 Subject: [PATCH] Connection spam prevention
 
 
 diff --git a/proxy/pom.xml b/proxy/pom.xml
-index 8b06957d..3673b19b 100644
+index 243394ba..df3477e5 100644
 --- a/proxy/pom.xml
 +++ b/proxy/pom.xml
-@@ -120,6 +120,15 @@
+@@ -114,6 +114,15 @@
              <scope>runtime</scope>
          </dependency>
          <!-- Waterfall end -->
@@ -25,10 +25,10 @@ index 8b06957d..3673b19b 100644
  
      <build>
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index 1a2064de..a8b0115a 100644
+index 0691d746..beaa2b3c 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -233,6 +233,7 @@ public class BungeeCord extends ProxyServer
+@@ -232,6 +232,7 @@ public class BungeeCord extends ProxyServer
          getPluginManager().registerCommand( null, new CommandIP() );
          getPluginManager().registerCommand( null, new CommandBungee() );
          getPluginManager().registerCommand( null, new CommandPerms() );
@@ -229,7 +229,7 @@ index 00000000..78773967
 +    }
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 6a1c76d0..6ba35965 100644
+index 5a0eb83b..afe79f18 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -362,18 +362,15 @@ public class InitialHandler extends PacketHandler implements PendingConnection
@@ -285,5 +285,5 @@ index 9a39f69e..5614fed1 100644
              if ( BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle( remoteAddress ) )
              {
 -- 
-2.26.2.windows.1
+2.27.0.windows.1
 

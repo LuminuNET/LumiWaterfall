@@ -1,4 +1,4 @@
-From d6eb8964c00924675039e9877b145b8a995cfc31 Mon Sep 17 00:00:00 2001
+From 80a83b96d63d1f4fbbdefd01814bbdfe2599612e Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 22:01:52 +0100
 Subject: [PATCH] ProxyInitializedEvent
@@ -24,10 +24,10 @@ index 00000000..ceb00f16
 +public class ProxyInitializedEvent extends Event {
 +}
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index c7be74fe..0d45a243 100644
+index 13fcc398..175261df 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -309,7 +309,7 @@ public class BungeeCord extends ProxyServer
+@@ -308,7 +308,7 @@ public class BungeeCord extends ProxyServer
              }
          }, 0, TimeUnit.MINUTES.toMillis( 5 ) );
          //metricsThread.scheduleAtFixedRate( new Metrics(), 0, TimeUnit.MINUTES.toMillis( Metrics.PING_INTERVAL ) ); // Waterfall: Disable Metrics
@@ -37,5 +37,5 @@ index c7be74fe..0d45a243 100644
          {
              @Override
 -- 
-2.26.2.windows.1
+2.27.0.windows.1
 

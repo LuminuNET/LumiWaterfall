@@ -1,4 +1,4 @@
-From 6c25efdba471641965361067eb45cf2793bc83ea Mon Sep 17 00:00:00 2001
+From c806626b74aac2d0c973844592e5ba0770089b9a Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 21:58:41 +0100
 Subject: [PATCH] Use constant enum values
@@ -22,10 +22,10 @@ index c3da93b2..1fa7264a 100644
 +    // Luminu end
  }
 diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
-index aa1515f4..6b6e2cf0 100644
+index 546564fb..3657032c 100644
 --- a/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
 +++ b/protocol/src/main/java/net/md_5/bungee/protocol/Protocol.java
-@@ -402,7 +402,7 @@ public enum Protocol
+@@ -421,7 +421,7 @@ public enum Protocol
  
      private static void dump(int version)
      {
@@ -34,7 +34,7 @@ index aa1515f4..6b6e2cf0 100644
          {
              dump( version, protocol );
          }
-@@ -586,4 +586,12 @@ public enum Protocol
+@@ -605,4 +605,12 @@ public enum Protocol
              return protocolData.packetMap.get( packet );
          }
      }
@@ -132,10 +132,10 @@ index 6bc1469c..91ce5525 100644
      }
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
-index d7d0fafc..5aaa3f9a 100644
+index 8c7e3ab8..18ce1b29 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
-@@ -209,7 +209,7 @@ public class DownstreamBridge extends PacketHandler
+@@ -210,7 +210,7 @@ public class DownstreamBridge extends PacketHandler
      {
          Scoreboard serverScoreboard = con.getServerSentScoreboard();
          serverScoreboard.setName( displayScoreboard.getName() );
@@ -167,5 +167,5 @@ index 7d79ef7b..522f7b38 100644
                  if ( playerListItem.getAction() == PlayerListItem.Action.ADD_PLAYER || playerListItem.getAction() == PlayerListItem.Action.UPDATE_GAMEMODE )
                  {
 -- 
-2.25.0.windows.1
+2.27.0.windows.1
 

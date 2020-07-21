@@ -1,4 +1,4 @@
-From ea1ea2e0113dfd18d218b422766715e93163353a Mon Sep 17 00:00:00 2001
+From c003764e653053025a19e7979fc52f526f78874d Mon Sep 17 00:00:00 2001
 From: KennyTV <kennytv@t-online.de>
 Date: Fri, 13 Mar 2020 21:29:15 +0100
 Subject: [PATCH] Database ID
@@ -54,10 +54,10 @@ index f7459860..b372d957 100644
 +    // Luminu end
  }
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index a963c748..bbe5630f 100644
+index 2938f2f1..bdc39a55 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -174,6 +174,7 @@ public class BungeeCord extends ProxyServer
+@@ -173,6 +173,7 @@ public class BungeeCord extends ProxyServer
      @Getter
      private ConnectionThrottle connectionThrottle;
      private final ModuleManager moduleManager = new ModuleManager();
@@ -65,7 +65,7 @@ index a963c748..bbe5630f 100644
  
      {
          // TODO: Proper fallback when we interface the manager
-@@ -598,6 +599,21 @@ public class BungeeCord extends ProxyServer
+@@ -597,6 +598,21 @@ public class BungeeCord extends ProxyServer
          return connections.size();
      }
  
@@ -87,7 +87,7 @@ index a963c748..bbe5630f 100644
      @Override
      public ProxiedPlayer getPlayer(String name)
      {
-@@ -745,6 +761,7 @@ public class BungeeCord extends ProxyServer
+@@ -750,6 +766,7 @@ public class BungeeCord extends ProxyServer
              connections.put( con.getName(), con );
              connectionsByUUID.put( con.getUniqueId(), con );
              connectionsByOfflineUUID.put( con.getPendingConnection().getOfflineId(), con );
@@ -95,7 +95,7 @@ index a963c748..bbe5630f 100644
          } finally
          {
              connectionLock.writeLock().unlock();
-@@ -762,6 +779,7 @@ public class BungeeCord extends ProxyServer
+@@ -767,6 +784,7 @@ public class BungeeCord extends ProxyServer
                  connections.remove( con.getName() );
                  connectionsByUUID.remove( con.getUniqueId() );
                  connectionsByOfflineUUID.remove( con.getPendingConnection().getOfflineId() );
@@ -104,7 +104,7 @@ index a963c748..bbe5630f 100644
          } finally
          {
 diff --git a/proxy/src/main/java/net/md_5/bungee/UserConnection.java b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
-index 87cff4ff..721166d0 100644
+index b0125245..ebaa6275 100644
 --- a/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 +++ b/proxy/src/main/java/net/md_5/bungee/UserConnection.java
 @@ -70,6 +70,11 @@ import net.md_5.bungee.util.ChatComponentTransformer;
@@ -120,17 +120,17 @@ index 87cff4ff..721166d0 100644
      @NonNull
      private final ProxyServer bungee;
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index 37ea35e3..2d61ce6b 100644
+index b848e451..c46a7f62 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -538,6 +538,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
  
-                             unsafe.sendPacket( new LoginSuccess( getUniqueId().toString(), getName() ) ); // With dashes in between
+                             unsafe.sendPacket( new LoginSuccess( getUniqueId(), getName() ) );
                              ch.setProtocol( Protocol.GAME );
 +                            bungee.getPluginManager().callEvent( new net.luminu.bungee.api.event.DatabaseIdRequestEvent( userCon ) ); // Luminu - database id
  
                              ch.getHandle().pipeline().get( HandlerBoss.class ).setHandler( new UpstreamBridge( bungee, userCon ) );
                              bungee.getPluginManager().callEvent( new PostLoginEvent( userCon ) );
 -- 
-2.26.2.windows.1
+2.27.0.windows.1
 
